@@ -16,4 +16,3 @@ If you use the code, please cite our papers:
 </pre>
 
 
-For any comments or questions, please  email <a href="mailto:howardqqme@gmail.com">the first author</a>.
