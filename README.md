@@ -18,7 +18,9 @@ If you use the code, please cite our papers:
 Data
 ------------
 source sentences: ./Data/examples.ch
+
 target sentences: ./Data/examples.en
+
 syntactic trees of source sentences: ./Data/examples.tree
 
 Note: We use binarized trees in our paper. The syntactic tree was decomposed into a sequence of triples, i.e., [left-child, right-child, parent]. 
