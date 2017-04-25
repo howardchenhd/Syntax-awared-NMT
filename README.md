@@ -16,3 +16,6 @@ If you use the code, please cite our papers:
 </pre>
 
 
+Note
+------------
+Using Tree-LSTM on top of the LSTM based encoder-decoder framework.
