@@ -16,3 +16,7 @@ If you use the code, please cite our papers:
 </pre>
 
 
+
+Note
+------------
+Using LSTM instead of GRU in both encoder and decoder.
