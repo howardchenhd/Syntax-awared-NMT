@@ -13,7 +13,7 @@ from nmt import (build_sampler, gen_sample, load_params,
 # from multiprocessing import Process, Queue
 
 
-def translate_model(queue, rqueue, mask_left, mask_right, write_mask, model, options, k, normalize):
+def translate_model(queue, rqueue, mask_left, mask_right, write_mask, eots, model, options, k, normalize):
 
     from theano.sandbox.rng_mrg import MRG_RandomStreams as RandomStreams
     trng = RandomStreams(1234)
@@ -29,13 +29,13 @@ def translate_model(queue, rqueue, mask_left, mask_right, write_mask, model, opt
     # word index
     f_init, f_next = build_sampler(tparams, options, trng, use_noise)
 
-    def _translate(seq, left, right, write):
+    def _translate(seq, left, right, write, eot):
         # sample given an input sequence and obtain scores
         print left.shape, right.shape, write.shape, len(seq)
         sample, score = gen_sample(tparams, f_init, f_next,
                                    numpy.array(seq).reshape([len(seq), 1]),
                                    left[:, :, None], right[:, :, None], write, 
-                                   options, trng=trng, k=k, maxlen=200,
+                                   eot[:, None], options, trng=trng, k=k, maxlen=200,
                                    stochastic=False, argmax=False)
 
         # normalize scores according to sequence lengths
@@ -45,13 +45,13 @@ def translate_model(queue, rqueue, mask_left, mask_right, write_mask, model, opt
         sidx = numpy.argmin(score)
         return sample[sidx]
 
-    for idx, [x, l, r, w] in enumerate(zip(queue, mask_left, mask_right, write_mask)):
+    for idx, [x, l, r, w, eot] in enumerate(zip(queue, mask_left, mask_right, write_mask, eots)):
         # req = queue.get()
         if x is None:
             break
 
         print idx
-        seq = _translate(x, l, r, w)
+        seq = _translate(x, l, r, w, eot)
 
         rqueue.append(seq)
 
@@ -110,6 +110,7 @@ def main(model, dictionary, dictionary_target, source_file, tree_file, saveto, k
         mask_left = []
         mask_right = []
         write_mask = []
+        eots = []
         len_x = []
         with open(fname, 'r') as f:
             for idx, line in enumerate(f):
@@ -131,9 +132,10 @@ def main(model, dictionary, dictionary_target, source_file, tree_file, saveto, k
                 mask_l = numpy.zeros((len(tree_actions), len_x[idx] + len(tree_actions))).astype('float32')
                 mask_r = numpy.zeros((len(tree_actions), len_x[idx] + len(tree_actions))).astype('float32')
                 wrt_mask = numpy.zeros((len(tree_actions), len_x[idx] + len(tree_actions))).astype('float32')
-                
+                eot = numpy.zeros((len_x[idx] + len(tree_actions), )).astype('float32')
+                eot[len_x[idx] + len(tree_actions)-1] = 1.
                 # print mask_l.shape
-
+                
                 idx_act = 0
                 for tree_act in tree_actions:
                     wrt_mask[idx_act][(eval(tree_act)[2] - 201) + len_x[idx]] = 1.
@@ -154,10 +156,11 @@ def main(model, dictionary, dictionary_target, source_file, tree_file, saveto, k
                 mask_left.append(mask_l)
                 mask_right.append(mask_r)
                 write_mask.append(wrt_mask)
+                eots.append(eot)
                     
         print 'tree file loaded!'
  
-        return idx+1, queue, mask_left, mask_right, write_mask
+        return idx+1, queue, mask_left, mask_right, write_mask, eots
 
 
     def _retrieve_jobs(n_samples):
@@ -173,9 +176,9 @@ def main(model, dictionary, dictionary_target, source_file, tree_file, saveto, k
 
 
     print 'Translating ', source_file, '...'
-    n_samples, queue, mask_l, mask_r, wtr_mask = _send_jobs(source_file, tree_file)                # return the number of sentences
+    n_samples, queue, mask_l, mask_r, wtr_mask, ets = _send_jobs(source_file, tree_file)                # return the number of sentences
     print 'sentence: ', n_samples   
-    translate_model(queue, rqueue, mask_l, mask_r, wtr_mask, model, options, k, normalize)
+    translate_model(queue, rqueue, mask_l, mask_r, wtr_mask, ets, model, options, k, normalize)
     print 'translated!'
     for i, trans in enumerate(_retrieve_jobs(n_samples)):
         samples = trans
