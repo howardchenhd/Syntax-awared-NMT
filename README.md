@@ -33,5 +33,7 @@ Note: We use binarized trees in our paper. The syntactic tree was decomposed int
 script
 ------------
 Berkeley parser tree to triple
+
 Source: Berkeley pareser tree(./script/nput_example.txt)
+
 Output: sequences of triples
