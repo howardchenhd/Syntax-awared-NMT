@@ -6,11 +6,16 @@ This package is developed by Huadong Chen, which is based on the <a href="https:
 If you use the code, please cite our papers:
 <pre>
 <code>
-@InProceedings{Chen:2017:ACL,
-      author    = {Huadong Chen, Shujian Huang, David Chiang and Jiajun Chen},
-      title     = {Improved Neural Machine Translation with a Syntax-Aware Encoder and Decoder},
-      booktitle = {Proceedings of the 55th Annual Meeting of the Association for Computational Linguistics},
-      year      = {2017},
+@InProceedings{chen-EtAl:2017:Long6,
+  author    = {Chen, Huadong  and  Huang, Shujian  and  Chiang, David  and  Chen, Jiajun},
+  title     = {Improved Neural Machine Translation with a Syntax-Aware Encoder and Decoder},
+  booktitle = {Proceedings of the 55th Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)},
+  month     = {July},
+  year      = {2017},
+  address   = {Vancouver, Canada},
+  publisher = {Association for Computational Linguistics},
+  pages     = {1936--1945},
+  url       = {http://aclweb.org/anthology/P17-1177}
 }
 </code>
 </pre>
@@ -24,3 +29,9 @@ Target sentences: ./Data/examples.en
 Syntactic trees of source sentences: ./Data/examples.tree
 
 Note: We use binarized trees in our paper. The syntactic tree was decomposed into a sequence of triples, i.e., [left-child, right-child, parent]. 
+
+script
+------------
+Berkeley parser tree to triple
+Source: Berkeley pareser tree(./script/nput_example.txt)
+Output: sequences of triples
